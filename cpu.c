@@ -50,9 +50,9 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA,
     }
   case ALU_DEC:
     cpu->registers[regA]--;
+  case ALU_INC:
+    cpu->registers[regA]++;
   }
-case ALU_INC:
-  cpu->registers[regA]++;
 }
 
 /**
@@ -122,7 +122,11 @@ void jmp(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
   cpu->PC = cpu->registers[operandA];
 }
 
-void jeq(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {}
+void jeq(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
+  if (cpu->FL >> 7 == 1) {
+    cpu->PC = cpu->registers[operandA];
+  }
+}
 
 void jne(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {}
 
