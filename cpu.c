@@ -17,12 +17,14 @@ void cpu_load(struct cpu *cpu, int num_args, char *file_name) {
 
   while (1) {
     fgets(c, sizeof(char) * 30, file);
-    if (feof(file)) {
-      break;
+    if (c[0] != '#' & c != " ") {
+      if (feof(file)) {
+        break;
+      }
+      char *endptr;
+      cpu->ram[cpu->PC] = (unsigned char)strtol(c, endptr, 2);
+      cpu->PC++;
     }
-    char *endptr;
-    cpu->ram[cpu->PC] = (unsigned char)strtol(c, endptr, 2);
-    cpu->PC++;
   }
   cpu->PC = 0;
 }
@@ -47,11 +49,16 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA,
   case ALU_CMP:
     if (cpu->registers[regA] == cpu->registers[regB]) {
       cpu->FL = cpu->FL | 0b00000001;
+    } else {
+      cpu->FL = cpu->FL | 0b00000000;
     }
+    break;
   case ALU_DEC:
     cpu->registers[regA]--;
+    break;
   case ALU_INC:
     cpu->registers[regA]++;
+    break;
   }
 }
 
@@ -142,8 +149,8 @@ void cpu_run(struct cpu *cpu) {
   //   mul
   // };
   void (*op[35])(struct cpu * cpu, unsigned char operandA,
-                 unsigned char operandB) = {ldi, prn, mul, push, pop, call, ret,
-                                            add, and, dec, jmp,  jeq, jne};
+                 unsigned char operandB) = {
+      ldi, prn, mul, push, pop, call, ret, add, and, dec, jmp, jeq, jne, cmp};
   int running = 1;
   unsigned char operandA;
   unsigned char operandB;
@@ -161,18 +168,23 @@ void cpu_run(struct cpu *cpu) {
     switch (cpu->IR) {
     case LDI:
       op[0](cpu, operandA, operandB);
+      // printf("\nLDI R%d, %d \n", operandA, operandB);
       break;
     case PRN:
       op[1](cpu, operandA, operandB);
+      // printf("\nPRN R%d \n", operandA);
       break;
     case MUL:
       op[2](cpu, operandA, operandB);
+      // printf("\nMUL R%d, R%d \n", operandA, operandB);
       break;
     case PUSH:
       op[3](cpu, operandA, operandB);
+      // printf("\nPUSH R%d \n", operandA);
       break;
     case POP:
       op[4](cpu, operandA, operandB);
+      // printf("\nPOP R%d \n", operandA);
       break;
     case CALL:
       op[5](cpu, operandA, operandB);
@@ -191,12 +203,20 @@ void cpu_run(struct cpu *cpu) {
       break;
     case JMP:
       op[10](cpu, operandA, operandB);
+      // printf("\nJMP R%d \n", operandA);
       break;
     case JEQ:
       op[11](cpu, operandA, operandB);
+      // printf("\nJEQ R%d \n", operandA);
       break;
     case JNE:
       op[12](cpu, operandA, operandB);
+      // printf("\nJNE R%d \n", operandA);
+      break;
+    case CMP:
+      op[13](cpu, operandA, operandB);
+      // printf("\nCMP R%d, R%d: %d == %d = %d \n", operandA, operandB,
+      //        cpu->registers[operandA], cpu->registers[operandB], cpu->FL);
       break;
     case HLT:
       running = 0;
