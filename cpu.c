@@ -27,12 +27,10 @@ void cpu_load(struct cpu *cpu, int num_args, char *file_name) {
   cpu->PC = 0;
 }
 
-
-
-// void handle_PUSH(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
+// void handle_PUSH(struct cpu *cpu, unsigned char operandA, unsigned char
+// operandB) {
 
 // }
-
 
 /**
  * ALU
@@ -53,18 +51,18 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA,
   case ALU_DEC:
     cpu->registers[regA]--;
   }
-  case ALU_INC:
-    cpu->registers[regA]++;
+case ALU_INC:
+  cpu->registers[regA]++;
 }
 
 /**
  * Run the CPU
  */
-int cpu_ram_read(struct cpu *cpu, int source) { 
-  return cpu->ram[source];
-  }
+int cpu_ram_read(struct cpu *cpu, int source) { return cpu->ram[source]; }
 
-void cpu_ram_write(struct cpu *cpu, int destination, int source) { cpu->ram[destination] = source; }
+void cpu_ram_write(struct cpu *cpu, int destination, int source) {
+  cpu->ram[destination] = source;
+}
 
 void ldi(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
   cpu->registers[operandA] = operandB;
@@ -103,8 +101,9 @@ void add(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
   alu(cpu, ALU_ADD, operandA, operandB);
 }
 
-void and(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
-  cpu->registers[operandA] = cpu->registers[operandA] & cpu->registers[operandB];
+void and (struct cpu * cpu, unsigned char operandA, unsigned char operandB) {
+  cpu->registers[operandA] =
+      cpu->registers[operandA] & cpu->registers[operandB];
 }
 
 void cmp(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
@@ -119,6 +118,14 @@ void inc(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
   alu(cpu, ALU_INC, operandA, operandB);
 }
 
+void jmp(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
+  cpu->PC = cpu->registers[operandA];
+}
+
+void jeq(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {}
+
+void jne(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {}
+
 void cpu_run(struct cpu *cpu) {
   // op *handle_ops[36] = {
   //   ldi,
@@ -126,18 +133,9 @@ void cpu_run(struct cpu *cpu) {
   //   push,
   //   mul
   // };
-  void (*op[35])(struct cpu *cpu, unsigned char operandA, unsigned char operandB) = {
-    ldi,
-    prn,
-    mul,
-    push,
-    pop,
-    call,
-    ret,
-    add,
-    and,
-    dec
-  };
+  void (*op[35])(struct cpu * cpu, unsigned char operandA,
+                 unsigned char operandB) = {ldi, prn, mul, push, pop, call, ret,
+                                            add, and, dec, jmp,  jeq, jne};
   int running = 1;
   unsigned char operandA;
   unsigned char operandB;
@@ -183,15 +181,21 @@ void cpu_run(struct cpu *cpu) {
     case DEC:
       op[9](cpu, operandA, operandB);
       break;
+    case JMP:
+      op[10](cpu, operandA, operandB);
+      break;
+    case JEQ:
+      op[11](cpu, operandA, operandB);
+      break;
+    case JNE:
+      op[12](cpu, operandA, operandB);
+      break;
     case HLT:
       running = 0;
       break;
     }
   }
 }
-
-
-
 
 /**
  * Initialize a CPU struct
