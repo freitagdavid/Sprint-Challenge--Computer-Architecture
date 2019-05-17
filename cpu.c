@@ -128,7 +128,11 @@ void jeq(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
   }
 }
 
-void jne(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {}
+void jne(struct cpu *cpu, unsigned char operandA, unsigned char operandB) {
+  if (cpu->FL >> 7 == 0) {
+    cpu->PC = cpu->registers[operandA];
+  }
+}
 
 void cpu_run(struct cpu *cpu) {
   // op *handle_ops[36] = {
